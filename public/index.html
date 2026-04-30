@@ -112,17 +112,15 @@
 
         <!-- ===== DASHBOARD SCREEN ===== -->
         <div id="dashboard-screen" class="content-screen">
-          <div class="screen-header dash-screen-header">
-            <div>
-              <h2>Station Overview</h2>
-              <p>Days since last audit per station</p>
-            </div>
-            <button id="dash-scan-btn" class="btn btn-primary btn-sm dash-scan-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
-              Scan to Audit
-            </button>
+          <div class="screen-header">
+            <h2>Station Overview</h2>
+            <p>Days since last audit per station</p>
           </div>
           <div id="dashboard-list" class="dashboard-list"></div>
+          <button id="dash-scan-btn" class="fab-scan-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="22" height="22"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+            <span>Scan to Audit</span>
+          </button>
         </div>
 
         <!-- ===== AUDIT SCREEN ===== -->

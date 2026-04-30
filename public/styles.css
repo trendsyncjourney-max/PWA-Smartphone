@@ -2384,7 +2384,7 @@ body {
    DASHBOARD SCREEN
    ============================================ */
 .dashboard-list {
-  padding: 0 var(--space-4) var(--space-6);
+  padding: 0 var(--space-4) 120px;
 }
 
 .dash-station-card {
@@ -2465,20 +2465,28 @@ body {
   color: var(--gray-500);
 }
 
-.dash-screen-header {
+.fab-scan-btn {
+  position: fixed;
+  bottom: calc(72px + env(safe-area-inset-bottom, 0px) + 16px);
+  right: 20px;
+  z-index: 200;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
+  gap: 8px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 99px;
+  padding: 14px 20px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(59,130,246,0.45);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
-.dash-screen-header h2 {
-  margin-bottom: 2px;
-}
-
-.dash-scan-btn {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.fab-scan-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(59,130,246,0.35);
 }
