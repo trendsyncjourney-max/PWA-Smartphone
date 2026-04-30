@@ -1171,6 +1171,27 @@ body {
   border-radius: 0;
 }
 
+.item-info-card {
+  text-align: center;
+  padding: var(--space-6) var(--space-5) var(--space-4);
+}
+
+.status-item-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  line-height: 1.2;
+  margin-bottom: var(--space-2);
+  word-break: break-word;
+}
+
+.status-item-barcode {
+  font-size: 0.8125rem;
+  color: var(--gray-400);
+  font-family: monospace;
+  letter-spacing: 0.03em;
+}
+
 @keyframes slideUpModal {
   from {
     transform: translateY(100%);
