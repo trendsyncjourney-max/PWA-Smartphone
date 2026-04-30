@@ -1185,6 +1185,14 @@ body {
   word-break: break-word;
 }
 
+.status-item-remarks {
+  font-size: 0.9375rem;
+  color: var(--gray-500);
+  font-style: italic;
+  margin-bottom: var(--space-2);
+  line-height: 1.4;
+}
+
 .status-item-barcode {
   font-size: 0.8125rem;
   color: var(--gray-400);

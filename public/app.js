@@ -483,8 +483,16 @@ async function handleBarcodeScan(barcode) {
   }
 }
 
-function populateItemInfoInModal(item) {
+function populateItemInfoInModal(item, remarks) {
   document.getElementById('status-item-name').textContent = item.item_name;
+  const remarksEl = document.getElementById('status-item-remarks');
+  if (remarks) {
+    remarksEl.textContent = remarks;
+    remarksEl.classList.remove('hidden');
+  } else {
+    remarksEl.textContent = '';
+    remarksEl.classList.add('hidden');
+  }
   const barcodeDisplay = document.getElementById('status-item-barcode');
   if (item.barcode) {
     barcodeDisplay.innerHTML = `<div class="barcode-display">*${item.barcode}*</div><div class="barcode-label">${item.barcode}</div>`;
@@ -499,7 +507,8 @@ function showConditionModal(item, subLocations, matchingEntries) {
   modal.dataset.mode = 'condition';
   modal.dataset.selectedCondition = '';
 
-  populateItemInfoInModal(item);
+  const remarks = matchingEntries[0]?.remarks || null;
+  populateItemInfoInModal(item, remarks);
   document.getElementById('status-modal-title').textContent = 'Item Condition';
 
   const subLocGroup = document.getElementById('condition-subloc-group');
@@ -531,7 +540,7 @@ function showMisplacedActionsModal(item) {
   modal.dataset.itemId = item.item_id;
   modal.dataset.mode = 'misplaced';
 
-  populateItemInfoInModal(item);
+  populateItemInfoInModal(item, null);
   document.getElementById('status-modal-title').textContent = 'Item Not Listed Here';
   document.getElementById('condition-mode').classList.add('hidden');
   document.getElementById('misplaced-mode').classList.remove('hidden');
