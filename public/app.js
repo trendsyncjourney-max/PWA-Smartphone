@@ -725,6 +725,17 @@ async function finishAudit() {
 
 // ==================== SCANNER ====================
 
+let scanCallback = null; // when set, scanner fills a form field instead of triggering audit flow
+
+function openScannerForField(fieldId) {
+  scanCallback = (barcode) => {
+    document.getElementById(fieldId).value = barcode;
+    closeScanner();
+    showToast('Barcode captured', 'success');
+  };
+  openScanner('Scan Barcode');
+}
+
 function openScanner(title) {
   document.getElementById('scanner-title').textContent = title;
   document.getElementById('scanner-modal').classList.remove('hidden');
@@ -751,7 +762,8 @@ function openScanner(title) {
         cameraId,
         { fps: 10, qrbox: { width: 250, height: 250 } },
         (decodedText) => {
-          handleBarcodeScan(decodedText);
+          if (scanCallback) { scanCallback(decodedText); scanCallback = null; }
+          else handleBarcodeScan(decodedText);
         },
         (errorMessage) => {
           // Suppress frequent scan errors
@@ -773,6 +785,7 @@ function openScanner(title) {
 }
 
 function closeScanner() {
+  scanCallback = null;
   if (html5QrCode) {
     html5QrCode.stop().then(() => {
       html5QrCode.clear();
@@ -928,7 +941,7 @@ document.getElementById('add-station-btn').addEventListener('click', () => {
   showFormModal('Add Station', [
     { name: 'name', label: 'Name', type: 'text', required: true },
     { name: 'location', label: 'Location', type: 'text' },
-    { name: 'barcode', label: 'Barcode', type: 'text' }
+    { name: 'barcode', label: 'Barcode', type: 'barcode' }
   ], async (data) => {
     await apiPost('/api/stations', data);
     loadStationsAdmin();
@@ -1011,7 +1024,7 @@ document.getElementById('add-item-btn').addEventListener('click', async () => {
     { name: 'version', label: 'Version', type: 'text' },
     { name: 'effective_date', label: 'Effective Date', type: 'date' },
     { name: 'expiry_date', label: 'Expiry Date', type: 'date' },
-    { name: 'barcode', label: 'Barcode', type: 'text' },
+    { name: 'barcode', label: 'Barcode', type: 'barcode' },
     { name: 'station_id', label: 'Assign to Station (optional)', type: 'select',
       options: [{ value: '', label: '— None —' }, ...stations.map(s => ({ value: s.station_id, label: s.name }))] }
   ], async (data) => {
@@ -1312,13 +1325,27 @@ function showFormModal(title, fields, onSubmit) {
         </div>
       `;
     }
+    if (f.type === 'barcode') {
+      return `
+        <div class="form-group">
+          <label for="field-${f.name}">${f.label}</label>
+          <div class="barcode-field-wrap">
+            <input type="text" id="field-${f.name}" name="${f.name}" placeholder="Type or scan" autocomplete="off" ${f.required ? 'required' : ''}>
+            <button type="button" class="btn btn-secondary btn-scan-field" onclick="openScannerForField('field-${f.name}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+              Scan
+            </button>
+          </div>
+        </div>
+      `;
+    }
     return `
       <div class="form-group">
         <label for="field-${f.name}">${f.label}</label>
         <input type="${f.type}" id="field-${f.name}" name="${f.name}" ${f.required ? 'required' : ''}>
       </div>
     `;
-  }).join('') + '<button type="submit" class="btn btn-primary">Save</button>';
+  }).join('') + '<button type="submit" class="btn btn-primary btn-block" style="margin-top:var(--space-2)">Save</button>';
   
   form.onsubmit = async (e) => {
     e.preventDefault();
