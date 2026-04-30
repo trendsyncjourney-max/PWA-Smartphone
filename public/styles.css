@@ -1192,6 +1192,36 @@ body {
   letter-spacing: 0.03em;
 }
 
+.station-dropdown-wrap {
+  width: 100%;
+  padding: 0 var(--space-2);
+}
+
+.station-dropdown {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-family: inherit;
+  background: var(--white);
+  color: var(--gray-800);
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23737373' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.station-dropdown:focus {
+  outline: none;
+  border-color: var(--dhl-yellow);
+  box-shadow: 0 0 0 4px rgba(255,204,0,0.15);
+}
+
 .barcode-field-wrap {
   display: flex;
   gap: var(--space-2);

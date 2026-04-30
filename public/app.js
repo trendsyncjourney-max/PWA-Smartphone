@@ -218,10 +218,24 @@ document.getElementById('change-password-form').addEventListener('submit', async
 
 // ==================== AUDIT SCREEN ====================
 
-function loadAuditScreen() {
+async function loadAuditScreen() {
   document.getElementById('audit-welcome').classList.remove('hidden');
   document.getElementById('audit-active').classList.add('hidden');
+  document.getElementById('station-search-input').value = '';
+  document.getElementById('station-search-results').innerHTML = '';
   currentAudit = null;
+
+  // Populate station dropdown
+  try {
+    const stations = await apiGet('/api/stations');
+    const dropdown = document.getElementById('station-dropdown');
+    dropdown.innerHTML = '<option value="">— Select a station —</option>' +
+      stations
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(s => `<option value="${s.station_id}" data-name="${s.name}" data-location="${s.location || ''}">${s.name}${s.location ? ' — ' + s.location : ''}</option>`)
+        .join('');
+    dropdown.value = '';
+  } catch (e) { /* offline: dropdown stays empty, search still works */ }
 }
 
 document.getElementById('scan-station-btn').addEventListener('click', () => {
@@ -253,6 +267,18 @@ function showScanPhase() {
   document.getElementById('submit-actions').classList.add('hidden');
   document.getElementById('scanning-actions').classList.remove('hidden');
 }
+
+// Station dropdown — select to start audit immediately
+document.getElementById('station-dropdown').addEventListener('change', function () {
+  const opt = this.options[this.selectedIndex];
+  if (!opt.value) return;
+  startAudit({
+    station_id: opt.value,
+    name: opt.dataset.name,
+    location: opt.dataset.location
+  });
+  this.value = ''; // reset so it can be re-selected if needed
+});
 
 // Station search
 document.getElementById('station-search-input').addEventListener('input', async (e) => {
