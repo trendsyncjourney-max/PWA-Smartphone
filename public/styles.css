@@ -2467,26 +2467,28 @@ body {
 
 .fab-scan-btn {
   position: fixed;
-  bottom: calc(72px + env(safe-area-inset-bottom, 0px) + 16px);
-  right: 20px;
+  top: calc(60px + env(safe-area-inset-top, 0px) + 12px);
+  right: 16px;
   z-index: 200;
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--primary);
+  background: rgba(220, 38, 38, 0.75);
   color: #fff;
   border: none;
   border-radius: 99px;
-  padding: 14px 20px;
-  font-size: 0.9375rem;
+  padding: 12px 18px;
+  font-size: 0.875rem;
   font-weight: 700;
-  box-shadow: 0 4px 16px rgba(59,130,246,0.45);
+  box-shadow: 0 4px 16px rgba(220,38,38,0.3);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition: transform 0.15s, background 0.15s;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .fab-scan-btn:active {
   transform: scale(0.95);
-  box-shadow: 0 2px 8px rgba(59,130,246,0.35);
+  background: rgba(220, 38, 38, 0.9);
 }
