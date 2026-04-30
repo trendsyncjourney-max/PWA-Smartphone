@@ -577,6 +577,7 @@ function renderItemChecklist() {
         <div class="checklist-item-info">
           <div class="checklist-item-name">${item.item_name} ${subLocHtml}</div>
           <div class="checklist-item-barcode">${item.barcode || '<em style="color:var(--warning)">No barcode — tap to update</em>'}</div>
+          ${item.remarks ? `<div class="checklist-item-remarks">${item.remarks}</div>` : ''}
         </div>
         <div id="item-cond-${rowKey}" class="item-condition-slot">${condHtml}</div>
       </div>
@@ -1584,7 +1585,7 @@ function buildA4ReportHtml(report) {
     <div class="rpt-subloc-block">
       <div class="rpt-subloc-header">${slName}</div>
       <table class="rpt-table">
-        <thead><tr><th>Item</th><th>Version</th><th>Status</th><th>Condition</th></tr></thead>
+        <thead><tr><th>Item</th><th>Version</th><th>Status</th><th>Condition</th><th>Remarks</th></tr></thead>
         <tbody>
           ${items.map(it => `
             <tr>
@@ -1592,6 +1593,7 @@ function buildA4ReportHtml(report) {
               <td>${it.version || it.item_version || '—'}</td>
               <td>${statusBadge(it.status)}</td>
               <td>${it.condition || '—'}</td>
+              <td class="rpt-remarks">${it.remarks || '—'}</td>
             </tr>
           `).join('')}
         </tbody>

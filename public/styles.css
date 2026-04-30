@@ -1890,6 +1890,13 @@ body {
   margin-top: 2px;
 }
 
+.checklist-item-remarks {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  font-style: italic;
+  margin-top: 3px;
+}
+
 .checklist-item-actions {
   display: flex;
   align-items: center;
@@ -2228,6 +2235,12 @@ body {
 
 .rpt-table tr:last-child td {
   border-bottom: none;
+}
+
+.rpt-remarks {
+  font-size: 0.75rem;
+  color: #737373;
+  font-style: italic;
 }
 
 @media print {

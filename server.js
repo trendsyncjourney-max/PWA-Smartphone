@@ -789,6 +789,7 @@ app.get('/api/reports/audits/:id', authenticateToken, (req, res) => {
     const itemsQuery = `
       SELECT ad.*, i.item_name, i.barcode, i.version as item_version,
         COALESCE(d.version, i.version) as version,
+        d.remarks,
         sl.name as sub_location_name
       FROM audit_details ad
       JOIN items i ON ad.item_id = i.item_id
