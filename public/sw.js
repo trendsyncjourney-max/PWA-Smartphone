@@ -12,7 +12,7 @@ const APP_SHELL = [
   '/fonts/LibreBarcode39.woff2',
   '/icon-192x192.png',
   '/icon-512x512.png',
-  '/dhl-logo.svg'
+  '/dhl-logo.png'
 ];
 
 // API GET paths whose responses are cached for offline use
