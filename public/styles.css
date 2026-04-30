@@ -2464,3 +2464,21 @@ body {
   background: var(--gray-100);
   color: var(--gray-500);
 }
+
+.dash-screen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.dash-screen-header h2 {
+  margin-bottom: 2px;
+}
+
+.dash-scan-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

@@ -219,6 +219,18 @@ document.getElementById('change-password-form').addEventListener('submit', async
 
 // ==================== DASHBOARD SCREEN ====================
 
+function dashScanToAudit() {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.nav-tab[data-screen="audit"]').classList.add('active');
+  document.querySelectorAll('.content-screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById('audit-screen').classList.remove('hidden');
+  loadAuditScreen();
+  scannerMode = 'station';
+  openScanner('Scan Station Barcode');
+}
+
+document.getElementById('dash-scan-btn').addEventListener('click', dashScanToAudit);
+
 async function loadDashboard() {
   const list = document.getElementById('dashboard-list');
   list.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Loading stations…</p></div>';
