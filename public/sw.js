@@ -1,5 +1,5 @@
-const STATIC_CACHE = 'barcode-audit-static-v6';
-const API_CACHE    = 'barcode-audit-api-v6';
+const STATIC_CACHE = 'barcode-audit-static-v7';
+const API_CACHE    = 'barcode-audit-api-v7';
 
 const APP_SHELL = [
   '/',
@@ -21,6 +21,7 @@ const CACHEABLE_API = [
   '/api/items',
   '/api/sub-locations',
   '/api/distribution',
+  '/api/dashboard',
   '/api/version'
 ];
 

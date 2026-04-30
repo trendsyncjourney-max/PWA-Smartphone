@@ -75,7 +75,13 @@
 
       <!-- Bottom Navigation -->
       <nav id="main-nav" class="bottom-nav">
-        <button class="nav-tab active" data-screen="audit">
+        <button class="nav-tab active" data-screen="dashboard">
+          <div class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          </div>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-tab" data-screen="audit">
           <div class="nav-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM9 3v18"/></svg>
           </div>
@@ -104,8 +110,17 @@
       <!-- Content Area -->
       <main class="content-area">
 
+        <!-- ===== DASHBOARD SCREEN ===== -->
+        <div id="dashboard-screen" class="content-screen">
+          <div class="screen-header">
+            <h2>Station Overview</h2>
+            <p>Days since last audit per station</p>
+          </div>
+          <div id="dashboard-list" class="dashboard-list"></div>
+        </div>
+
         <!-- ===== AUDIT SCREEN ===== -->
-        <div id="audit-screen" class="content-screen">
+        <div id="audit-screen" class="content-screen hidden">
           <!-- Welcome / Start State -->
           <div id="audit-welcome" class="audit-welcome">
             <h2>Start New Audit</h2>

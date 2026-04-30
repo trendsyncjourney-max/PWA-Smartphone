@@ -809,6 +809,32 @@ app.get('/api/reports/audits/:id', authenticateToken, (req, res) => {
   });
 });
 
+// Dashboard: all stations with days since last completed audit
+app.get('/api/dashboard', authenticateToken, (req, res) => {
+  const query = `
+    SELECT
+      s.station_id, s.name, s.location,
+      MAX(a.end_time) as last_audit_date,
+      u.username as last_audited_by,
+      CASE WHEN MAX(a.end_time) IS NOT NULL
+        THEN CAST(julianday('now') - julianday(MAX(a.end_time)) AS INTEGER)
+        ELSE NULL
+      END as days_since
+    FROM stations s
+    LEFT JOIN audits a ON s.station_id = a.station_id AND a.status = 'completed'
+    LEFT JOIN users u ON a.user_id = u.user_id AND a.end_time = (
+      SELECT MAX(a2.end_time) FROM audits a2
+      WHERE a2.station_id = s.station_id AND a2.status = 'completed'
+    )
+    GROUP BY s.station_id
+    ORDER BY s.name
+  `;
+  db.all(query, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
 // Get summary report
 app.get('/api/reports/summary', authenticateToken, (req, res) => {
   const { start_date, end_date } = req.query;

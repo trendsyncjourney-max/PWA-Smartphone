@@ -2379,3 +2379,88 @@ body {
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+/* ============================================
+   DASHBOARD SCREEN
+   ============================================ */
+.dashboard-list {
+  padding: 0 var(--space-4) var(--space-6);
+}
+
+.dash-station-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-4);
+  margin-bottom: var(--space-3);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dash-station-card:active {
+  background: var(--gray-50);
+  transform: scale(0.985);
+}
+
+.dash-station-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.dash-station-name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dash-station-location {
+  font-size: 0.8125rem;
+  color: var(--gray-500);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dash-station-sub {
+  font-size: 0.75rem;
+  color: var(--gray-400);
+  margin-top: 1px;
+}
+
+.dash-badge {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
+.dash-badge-good {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.dash-badge-warn {
+  background: #fef9c3;
+  color: #a16207;
+}
+
+.dash-badge-overdue {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.dash-badge-never {
+  background: var(--gray-100);
+  color: var(--gray-500);
+}

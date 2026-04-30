@@ -50,7 +50,7 @@ function showMainScreen() {
     });
   }
   
-  loadAuditScreen();
+  loadDashboard();
 }
 
 document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -161,6 +161,7 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
     document.querySelectorAll('.content-screen').forEach(s => s.classList.add('hidden'));
     document.getElementById(`${screen}-screen`).classList.remove('hidden');
     
+    if (screen === 'dashboard') loadDashboard();
     if (screen === 'audit') loadAuditScreen();
     if (screen === 'reports') loadReports();
     if (screen === 'issues') loadIssuesScreen();
@@ -215,6 +216,72 @@ document.getElementById('change-password-form').addEventListener('submit', async
     errorEl.classList.remove('hidden');
   }
 });
+
+// ==================== DASHBOARD SCREEN ====================
+
+async function loadDashboard() {
+  const list = document.getElementById('dashboard-list');
+  list.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Loading stations…</p></div>';
+
+  try {
+    const stations = await apiGet('/api/dashboard');
+    if (!stations.length) {
+      list.innerHTML = '<div class="empty-state"><p>No stations found.</p></div>';
+      return;
+    }
+
+    list.innerHTML = stations.map(s => {
+      let badge, badgeClass, sub;
+      if (s.days_since === null) {
+        badge = 'No audit done';
+        badgeClass = 'dash-badge-never';
+        sub = '';
+      } else if (s.days_since === 0) {
+        badge = 'Today';
+        badgeClass = 'dash-badge-good';
+        sub = s.last_audited_by ? `by ${s.last_audited_by}` : '';
+      } else if (s.days_since === 1) {
+        badge = '1 day ago';
+        badgeClass = 'dash-badge-good';
+        sub = s.last_audited_by ? `by ${s.last_audited_by}` : '';
+      } else if (s.days_since <= 7) {
+        badge = `${s.days_since} days ago`;
+        badgeClass = 'dash-badge-good';
+        sub = s.last_audited_by ? `by ${s.last_audited_by}` : '';
+      } else if (s.days_since <= 30) {
+        badge = `${s.days_since} days ago`;
+        badgeClass = 'dash-badge-warn';
+        sub = s.last_audited_by ? `by ${s.last_audited_by}` : '';
+      } else {
+        badge = `${s.days_since} days ago`;
+        badgeClass = 'dash-badge-overdue';
+        sub = s.last_audited_by ? `by ${s.last_audited_by}` : '';
+      }
+
+      return `
+        <div class="dash-station-card" data-id="${s.station_id}" data-name="${s.name}" data-location="${s.location || ''}">
+          <div class="dash-station-info">
+            <div class="dash-station-name">${s.name}</div>
+            ${s.location ? `<div class="dash-station-location">${s.location}</div>` : ''}
+            ${sub ? `<div class="dash-station-sub">${sub}</div>` : ''}
+          </div>
+          <div class="dash-badge ${badgeClass}">${badge}</div>
+        </div>`;
+    }).join('') + LIST_END;
+
+    list.querySelectorAll('.dash-station-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector('.nav-tab[data-screen="audit"]').classList.add('active');
+        document.querySelectorAll('.content-screen').forEach(s => s.classList.add('hidden'));
+        document.getElementById('audit-screen').classList.remove('hidden');
+        startAudit({ station_id: card.dataset.id, name: card.dataset.name, location: card.dataset.location });
+      });
+    });
+  } catch (e) {
+    list.innerHTML = '<div class="empty-state"><p>Could not load dashboard.</p></div>';
+  }
+}
 
 // ==================== AUDIT SCREEN ====================
 
