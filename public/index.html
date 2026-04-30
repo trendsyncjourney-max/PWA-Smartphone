@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Barcode Audit System</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon-192x192.png">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/fonts/fonts.css">
+</head>
+<body>
+  <div id="offline-banner" class="offline-banner hidden">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+    Offline — showing cached data. Changes will sync when reconnected.
+  </div>
+  <div id="app">
+    <!-- ========== LOGIN SCREEN ========== -->
+    <div id="login-screen" class="screen">
+      <div class="login-wrapper">
+        <div class="login-brand">
+          <div class="brand-icon">
+            <img src="/dhl-logo.svg" alt="DHL Logo" class="dhl-logo-img">
+          </div>
+          <h1>Barcode Audit</h1>
+          <p class="brand-tagline">Cargo Asset Tracking</p>
+        </div>
+
+        <div class="card login-card">
+          <form id="login-form">
+            <div class="form-group">
+              <label for="username">Username</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <input type="text" id="username" name="username" required autocomplete="username" placeholder="Enter username">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="password">Password</label>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Enter password">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+              Sign In
+            </button>
+          </form>
+          <div id="login-error" class="error-message"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MAIN SCREEN ========== -->
+    <div id="main-screen" class="screen hidden">
+      <!-- Header -->
+      <header class="app-header">
+        <div class="header-brand">
+          <div class="header-icon">
+            <img src="/dhl-logo.svg" alt="DHL" class="header-logo-img">
+          </div>
+          <span class="header-title">Cargo Audit</span>
+        </div>
+        <div class="header-actions">
+          <span id="user-name" class="user-badge"></span>
+          <button id="menu-btn" class="icon-btn" aria-label="Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Bottom Navigation -->
+      <nav id="main-nav" class="bottom-nav">
+        <button class="nav-tab active" data-screen="audit">
+          <div class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM9 3v18"/></svg>
+          </div>
+          <span>Audit</span>
+        </button>
+        <button class="nav-tab" data-screen="reports">
+          <div class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <span>Reports</span>
+        </button>
+        <button class="nav-tab" data-screen="issues">
+          <div class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <span>Issues</span>
+        </button>
+        <button class="nav-tab admin-only hidden" data-screen="admin" style="display: none;">
+          <div class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <span>Admin</span>
+        </button>
+      </nav>
+
+      <!-- Content Area -->
+      <main class="content-area">
+
+        <!-- ===== AUDIT SCREEN ===== -->
+        <div id="audit-screen" class="content-screen">
+          <!-- Welcome / Start State -->
+          <div id="audit-welcome" class="audit-welcome">
+            <h2>Start New Audit</h2>
+            <p>Scan a station barcode to begin auditing items</p>
+            <button id="scan-station-btn" class="btn btn-primary btn-xl btn-scan">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+              Scan Station Barcode
+            </button>
+
+            <div class="divider">
+              <span>or</span>
+            </div>
+
+            <div id="station-search" class="search-box">
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="station-search-input" placeholder="Search station name..." autocomplete="off">
+              </div>
+              <div id="station-search-results" class="search-results"></div>
+            </div>
+          </div>
+
+          <!-- Active Audit State -->
+          <div id="audit-active" class="hidden">
+            <!-- Station Card -->
+            <div class="station-card">
+              <div class="station-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </div>
+              <div class="station-card-body">
+                <h3 id="audit-station-name"></h3>
+                <p id="audit-station-location"></p>
+                <div class="audit-timer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span id="audit-start-time"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Progress Stats -->
+            <div class="stats-row">
+              <div class="stat-card stat-found">
+                <div class="stat-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-value" id="count-found">0</span>
+                  <span class="stat-label">Found</span>
+                </div>
+              </div>
+              <div class="stat-card stat-missing">
+                <div class="stat-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-value" id="count-missing">0</span>
+                  <span class="stat-label">Missing</span>
+                </div>
+              </div>
+              <div class="stat-card stat-misplaced">
+                <div class="stat-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-value" id="count-misplaced">0</span>
+                  <span class="stat-label">Misplaced</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons: Scanning Phase -->
+            <div id="scanning-actions" class="audit-actions">
+              <button id="scan-item-btn" class="btn btn-primary btn-scan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+                Scan Item
+              </button>
+              <div class="action-row">
+                <button id="done-scanning-btn" class="btn btn-secondary">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                  Done Scanning
+                </button>
+                <button id="cancel-audit-btn" class="btn btn-ghost btn-danger-text">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  Cancel
+                </button>
+              </div>
+            </div>
+
+            <!-- Action Buttons: Submit Phase -->
+            <div id="submit-actions" class="audit-actions hidden">
+              <button id="finish-audit-btn" class="btn btn-success btn-block">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                Submit Report
+              </button>
+              <div class="action-row">
+                <button id="resume-scanning-btn" class="btn btn-secondary">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+                  Resume Scanning
+                </button>
+                <button id="cancel-audit-btn-2" class="btn btn-ghost btn-danger-text">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  Cancel
+                </button>
+              </div>
+            </div>
+
+            <!-- Items List -->
+            <div class="section-header">
+              <h4>Station Items</h4>
+              <span class="section-count" id="items-count">0 items</span>
+            </div>
+            <div id="audit-items-list" class="items-list"></div>
+          </div>
+        </div>
+
+        <!-- ===== REPORTS SCREEN ===== -->
+        <div id="reports-screen" class="content-screen hidden">
+          <div class="screen-header">
+            <h2>Audit Reports</h2>
+            <p>View and filter completed audits</p>
+          </div>
+
+          <div class="filter-card">
+            <div class="filter-row">
+              <div class="form-group">
+                <label>From</label>
+                <input type="date" id="report-start-date">
+              </div>
+              <div class="form-group">
+                <label>To</label>
+                <input type="date" id="report-end-date">
+              </div>
+            </div>
+            <button id="filter-reports-btn" class="btn btn-secondary btn-block">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+              Apply Filter
+            </button>
+          </div>
+
+          <div id="reports-list" class="reports-list"></div>
+        </div>
+
+        <!-- ===== ISSUES SCREEN ===== -->
+        <div id="issues-screen" class="content-screen hidden">
+          <div class="screen-header">
+            <h2>Report Issue</h2>
+            <p>Report problems or request help</p>
+          </div>
+
+          <div class="card" style="padding: var(--space-5); margin-bottom: var(--space-4);">
+            <form id="issue-form">
+              <div class="form-group">
+                <label for="issue-title">Title</label>
+                <input type="text" id="issue-title" placeholder="Brief description of the issue" required>
+              </div>
+              <div class="form-group">
+                <label for="issue-category">Category</label>
+                <select id="issue-category" required>
+                  <option value="general">General</option>
+                  <option value="bug">Bug/Error</option>
+                  <option value="feature">Feature Request</option>
+                  <option value="station">Station Problem</option>
+                  <option value="item">Item Problem</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="issue-description">Description</label>
+                <textarea id="issue-description" rows="4" placeholder="Describe the issue in detail..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                Submit Report
+              </button>
+            </form>
+          </div>
+
+          <div id="my-issues-section" class="hidden">
+            <div class="section-header">
+              <h4>My Reports</h4>
+            </div>
+            <div id="my-issues-list" class="reports-list"></div>
+          </div>
+        </div>
+
+        <!-- ===== ADMIN SCREEN ===== -->
+        <div id="admin-screen" class="content-screen hidden admin-only">
+          <div class="screen-header">
+            <h2>Admin Settings</h2>
+            <p>Manage stations, items, and users</p>
+          </div>
+
+          <div class="admin-tabs-wrap">
+            <div class="admin-tabs" id="admin-tabs-scroll">
+              <button class="admin-tab active" data-admin="stations">Stations</button>
+              <button class="admin-tab" data-admin="sub-locations">Sub-Locs</button>
+              <button class="admin-tab" data-admin="items">Items</button>
+              <button class="admin-tab" data-admin="distribution">Distribution</button>
+              <button class="admin-tab" data-admin="users">Users</button>
+              <button class="admin-tab" data-admin="reports">Reports</button>
+              <button class="admin-tab" data-admin="issues">Issues</button>
+              <button class="admin-tab" data-admin="query">Query</button>
+              <button class="admin-tab" data-admin="backups">Backups</button>
+              <button class="admin-tab" data-admin="settings">Settings</button>
+            </div>
+          </div>
+
+          <!-- Stations -->
+          <div id="admin-stations" class="admin-panel">
+            <div class="panel-toolbar">
+              <h3>Stations</h3>
+              <button id="add-station-btn" class="btn btn-primary btn-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add
+              </button>
+            </div>
+            <div id="stations-list" class="data-list"></div>
+          </div>
+
+          <!-- Sub-Locations -->
+          <div id="admin-sub-locations" class="admin-panel hidden">
+            <div class="panel-toolbar">
+              <h3>Sub-Locations</h3>
+              <button id="add-sublocation-btn" class="btn btn-primary btn-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add
+              </button>
+            </div>
+            <div class="filter-bar">
+              <select id="subloc-station-filter" onchange="renderSubLocsList()" style="padding-left:1rem">
+                <option value="">All Stations</option>
+              </select>
+            </div>
+            <div id="sub-locations-list" class="data-list"></div>
+          </div>
+
+          <!-- Items -->
+          <div id="admin-items" class="admin-panel hidden">
+            <div class="panel-toolbar">
+              <h3>Items</h3>
+              <button id="add-item-btn" class="btn btn-primary btn-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add
+              </button>
+            </div>
+            <div id="items-list" class="data-list"></div>
+          </div>
+
+          <!-- Distribution -->
+          <div id="admin-distribution" class="admin-panel hidden">
+            <div class="panel-toolbar">
+              <h3>Distribution</h3>
+              <button id="add-distribution-btn" class="btn btn-primary btn-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Assign
+              </button>
+            </div>
+            <div class="filter-bar">
+              <select id="dist-filter-station" onchange="onDistFilterStationChange()" style="padding-left:1rem">
+                <option value="">All Stations</option>
+              </select>
+              <select id="dist-filter-subloc" onchange="renderDistributionList()" style="padding-left:1rem">
+                <option value="">All Sub-locations</option>
+              </select>
+            </div>
+            <div id="distribution-list" class="data-list"></div>
+          </div>
+
+          <!-- Users -->
+          <div id="admin-users" class="admin-panel hidden">
+            <div class="panel-toolbar">
+              <h3>Users</h3>
+              <button id="add-user-btn" class="btn btn-primary btn-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add
+              </button>
+            </div>
+            <div id="users-list" class="data-list"></div>
+          </div>
+
+          <!-- Reports -->
+          <div id="admin-reports" class="admin-panel hidden">
+            <div class="panel-toolbar">
+              <h3>Audit Reports</h3>
+              <div style="display:flex;gap:var(--space-2)">
+                <button id="export-reports-csv-btn" class="btn btn-secondary btn-sm">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                  CSV
+                </button>
+                <button id="export-reports-pdf-btn" class="btn btn-secondary btn-sm">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15v2m3-4v4m3-2v2"/></svg>
+                  PDF
+                </button>
+              </div>
+            </div>
+            <div id="admin-reports-list"></div>
+            <div id="print-reports-area" style="display:none"></div>
+          </div>
+
+          <!-- Issue Reports -->
+          <div id="admin-issues" class="admin-panel hidden">
+            <div class="panel-toolbar">
+              <h3>Issue Reports</h3>
+            </div>
+            <div id="admin-issues-list" class="data-list"></div>
+          </div>
+
+          <!-- Query -->
+          <div id="admin-query" class="admin-panel hidden">
+            <div class="panel-toolbar">
+              <h3>Station Query</h3>
+            </div>
+            <div class="form-group" style="margin-bottom:var(--space-5)">
+              <select id="query-station-select" style="padding-left:1rem">
+                <option value="">— Select a Station —</option>
+              </select>
+            </div>
+            <div id="query-results" class="hidden">
+              <div class="section-header">
+                <h4>Active Audits</h4>
+              </div>
+              <div id="query-active-audits" class="data-list" style="margin-bottom:var(--space-5)"></div>
+              <div class="section-header">
+                <h4>Past Audits</h4>
+              </div>
+              <div id="query-past-audits" class="data-list"></div>
+            </div>
+          </div>
+
+          <!-- Backups -->
+          <div id="admin-backups" class="admin-panel hidden">
+            <div class="panel-toolbar">
+              <h3>Database Backups</h3>
+              <button id="create-backup-btn" class="btn btn-primary btn-sm" onclick="createManualBackup()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Backup Now
+              </button>
+            </div>
+            <p style="padding: 0 var(--space-5); margin-bottom: var(--space-4); font-size: 0.8125rem; color: var(--gray-500);">Up to 7 rolling backups. Oldest is removed when a new one is created. Restoring will restart the server (~3 seconds downtime).</p>
+            <div id="backups-list" class="data-list"></div>
+          </div>
+
+          <!-- Settings -->
+          <div id="admin-settings" class="admin-panel hidden">
+            <div class="panel-toolbar">
+              <h3>Settings</h3>
+            </div>
+            <div class="card" style="padding: var(--space-5);">
+              <form id="settings-form">
+                <div class="form-group">
+                  <label for="admin-email">Admin Email for Reports</label>
+                  <input type="email" id="admin-email" placeholder="admin@company.com">
+                  <p style="font-size: 0.8125rem; color: var(--gray-400); margin-top: var(--space-1);">Issue reports will be sent to this email</p>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                  Save Settings
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- ========== SCANNER MODAL ========== -->
+    <div id="scanner-modal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content modal-full">
+        <div class="modal-header modal-header-dark">
+          <h3 id="scanner-title">Scan Barcode</h3>
+          <button class="close-btn close-btn-light" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="scanner-body">
+          <div class="scanner-frame">
+            <div id="scanner-viewport"></div>
+            <div class="scanner-overlay">
+              <div class="scanner-target">
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+                <div class="scanner-line"></div>
+              </div>
+            </div>
+          </div>
+          <div id="scanner-status" class="scanner-status">
+            <div class="status-pulse"></div>
+            <span>Initializing camera...</span>
+          </div>
+        </div>
+        <div class="scanner-footer">
+          <div class="manual-entry">
+            <div class="input-wrap">
+              <input type="text" id="manual-barcode" placeholder="Type barcode manually" autocomplete="off">
+            </div>
+            <button id="manual-submit" class="btn btn-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== ITEM STATUS MODAL ========== -->
+    <div id="status-modal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="status-modal-title">Item Status</h3>
+          <button class="close-btn" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="item-info-card">
+            <div class="item-info-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </div>
+            <div class="item-info-body">
+              <strong id="status-item-name"></strong>
+              <div id="status-item-barcode"></div>
+            </div>
+          </div>
+
+          <!-- MODE 1: Condition selector (item belongs to this station) -->
+          <div id="condition-mode">
+            <div id="condition-subloc-group" class="form-group hidden" style="padding:0 var(--space-5)">
+              <label>Found at Sub-location</label>
+              <select id="condition-subloc-select" style="padding-left:1rem"></select>
+            </div>
+            <div class="condition-section">
+              <p class="condition-label">Item Condition</p>
+              <div class="condition-btn-row">
+                <button class="condition-btn cond-good" data-condition="Good">Good</button>
+                <button class="condition-btn cond-ok" data-condition="OK">OK</button>
+                <button class="condition-btn cond-bad" data-condition="Bad">Bad</button>
+              </div>
+            </div>
+            <div style="padding: 0 var(--space-5) var(--space-5);">
+              <button id="confirm-condition-btn" class="btn btn-success btn-block" disabled>Confirm Found</button>
+            </div>
+          </div>
+
+          <!-- MODE 2: Misplaced item actions (item NOT assigned to this station) -->
+          <div id="misplaced-mode" class="hidden">
+            <p class="misplaced-notice">This item is not assigned to this station</p>
+            <div class="misplaced-action-list">
+              <button class="misplaced-action-btn action-warn" data-action="Old_Replace">
+                <span class="action-icon">⚠</span>
+                <span>Old ver. item, replace ASAP</span>
+              </button>
+              <button class="misplaced-action-btn action-ok" data-action="Old_Replaced">
+                <span class="action-icon">✓</span>
+                <span>Old ver. item replaced</span>
+              </button>
+              <button class="misplaced-action-btn action-removed" data-action="Misplaced_Removed">
+                <span class="action-icon">✗</span>
+                <span>Misplaced Item removed</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== FORM MODAL ========== -->
+    <div id="form-modal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="form-title">Add</h3>
+          <button class="close-btn" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="data-form"></form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== ACCOUNT MODAL ========== -->
+    <div id="account-modal" class="modal hidden">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Account</h3>
+          <button class="close-btn" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div style="padding: var(--space-5);">
+          <p style="color: var(--gray-500); margin-bottom: var(--space-5);">Signed in as <strong id="account-username"></strong></p>
+          <form id="change-password-form">
+            <div class="form-group">
+              <label for="cp-current">Current Password</label>
+              <input type="password" id="cp-current" placeholder="Enter current password" required style="padding-left:1rem">
+            </div>
+            <div class="form-group">
+              <label for="cp-new">New Password</label>
+              <input type="password" id="cp-new" placeholder="At least 6 characters" required minlength="6" style="padding-left:1rem">
+            </div>
+            <div class="form-group">
+              <label for="cp-confirm">Confirm New Password</label>
+              <input type="password" id="cp-confirm" placeholder="Repeat new password" required style="padding-left:1rem">
+            </div>
+            <div id="cp-error" class="error-message hidden"></div>
+            <button type="submit" class="btn btn-primary btn-block">Update Password</button>
+          </form>
+          <div id="app-version-info" style="margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--gray-100); margin-bottom: var(--space-5);">
+            <p class="version-row"><span class="version-label">App Version</span><span id="ver-app" class="version-value">—</span></p>
+            <p class="version-row"><span class="version-label">Last Updated</span><span id="ver-date" class="version-value">—</span></p>
+            <p class="version-row"><span class="version-label">Database Updated</span><span id="ver-db" class="version-value">—</span></p>
+          </div>
+          <div style="padding-top: var(--space-4); border-top: 1px solid var(--gray-100);">
+            <button id="account-logout-btn" class="btn btn-danger btn-block">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PRINT AREA (single audit A4 report) ========== -->
+    <div id="print-report-area" style="display:none"></div>
+
+    <!-- ========== TOAST CONTAINER ========== -->
+    <div id="toast-container"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/vendor/html5-qrcode.min.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
