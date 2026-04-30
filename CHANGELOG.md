@@ -2,6 +2,20 @@
 
 ---
 
+## v1.7.0 — 2026-04-30
+
+### Added
+- **Dashboard landing page** — new first tab showing all stations with days since last audit, colour-coded green/amber/red by recency, "No audit done" for stations never audited, and who last audited each station
+- **Scan to Audit shortcut** — button in the dashboard header that opens the station scanner immediately so users can start an audit in one tap
+- **Item remarks in checklist** — when scanning items during an audit, remarks are shown in italic below the barcode for context
+- **Item remarks in PDF report** — Remarks column added to the A4 audit detail table
+
+### Changed
+- Dashboard is now the default landing screen after login for all users
+- Tapping any station card on the dashboard jumps straight into an audit for that station
+
+---
+
 ## v1.6.0 — 2026-04-30
 
 ### Added

@@ -1,5 +1,5 @@
-const STATIC_CACHE = 'barcode-audit-static-v7';
-const API_CACHE    = 'barcode-audit-api-v7';
+const STATIC_CACHE = 'barcode-audit-static-v8';
+const API_CACHE    = 'barcode-audit-api-v8';
 
 const APP_SHELL = [
   '/',
