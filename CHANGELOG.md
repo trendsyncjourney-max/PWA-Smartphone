@@ -2,6 +2,17 @@
 
 ---
 
+## v1.8.0 — 2026-04-30
+
+### Added
+- **Remarks in scan modal** — when an item is scanned and found, its remarks (if any) are displayed below the item name in the condition popup
+- **Floating Scan to Audit button** — semi-transparent red FAB at the top-right of the dashboard; one tap opens the station scanner immediately
+
+### Fixed
+- **Sub-location tag always visible** — moved sub-location tag to its own line below the item name in the checklist so it is never clipped when names are long
+
+---
+
 ## v1.7.0 — 2026-04-30
 
 ### Added
