@@ -726,8 +726,14 @@ async function finishAudit() {
 // ==================== SCANNER ====================
 
 let scanCallback = null; // when set, scanner fills a form field instead of triggering audit flow
+let scanRestoreModal = null; // form modal to restore after field scan
 
 function openScannerForField(fieldId) {
+  // Hide the form modal so the scanner can show on top
+  const formModal = document.getElementById('form-modal');
+  formModal.classList.add('hidden');
+  scanRestoreModal = formModal;
+
   scanCallback = (barcode) => {
     document.getElementById(fieldId).value = barcode;
     closeScanner();
@@ -786,6 +792,10 @@ function openScanner(title) {
 
 function closeScanner() {
   scanCallback = null;
+  if (scanRestoreModal) {
+    scanRestoreModal.classList.remove('hidden');
+    scanRestoreModal = null;
+  }
   if (html5QrCode) {
     html5QrCode.stop().then(() => {
       html5QrCode.clear();
