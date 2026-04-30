@@ -1,180 +1,259 @@
-# DHL Cargo Barcode Audit PWA
+# Barcode Audit System — PWA-Smartphone
 
-A mobile-first Progressive Web App (PWA) for auditing cargo assets at DHL stations. Staff scan station and item barcodes to confirm what's present, flag missing or misplaced items, and submit audit reports — all from their phone, with or without internet.
+A fully offline-capable, installable Progressive Web App for auditing cargo assets at stations. Designed to work as a **standalone app on smartphones** with zero internet dependency after first load — no CDN, no external fonts, no external scripts.
+
+> **Two repos exist:**
+> - **[`PWA`](https://github.com/trendsyncjourney-max/PWA)** — base web version (`claude-main` branch)
+> - **`PWA-Smartphone`** (this repo) — offline-first, phone-optimised, all dependencies self-hosted (`dev` branch)
 
 ---
 
 ## Table of Contents
 
-- [What It Does](#what-it-does)
-- [Screenshots & Flow](#screenshots--flow)
+- [What Makes This Different from PWA](#what-makes-this-different-from-pwa)
+- [Features](#features)
 - [Requirements](#requirements)
-- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Production Deploy with PM2](#production-deploy-with-pm2)
+- [Expose Over the Internet (Cloudflare Tunnel)](#expose-over-the-internet-cloudflare-tunnel)
 - [First-Time Setup](#first-time-setup)
 - [How to Use](#how-to-use)
-  - [Logging In](#logging-in)
-  - [Running an Audit](#running-an-audit)
-  - [Reporting an Issue](#reporting-an-issue)
-  - [Admin Panel](#admin-panel)
-  - [Changing Your Password](#changing-your-password)
-- [Installing on Your Phone (PWA)](#installing-on-your-phone-pwa)
+- [Installing on Your Phone](#installing-on-your-phone)
+- [Offline Behaviour](#offline-behaviour)
 - [Default Credentials](#default-credentials)
 - [Environment Variables](#environment-variables)
 - [Project Structure](#project-structure)
-- [Versioning](#versioning)
+- [Version History](#version-history)
+- [Tech Stack](#tech-stack)
 
 ---
 
-## What It Does
+## What Makes This Different from PWA
 
-The Barcode Audit PWA lets DHL cargo staff:
+| Feature | PWA (base) | PWA-Smartphone (this repo) |
+|---|---|---|
+| Works fully offline | Partial | ✅ Full — app shell + API data cached |
+| Dependencies | Some CDN links | ✅ 100% self-hosted |
+| Font (Libre Barcode 39) | Google Fonts CDN | ✅ Downloaded locally |
+| Barcode scanner library | CDN | ✅ Bundled in `/vendor/` |
+| App icons (install) | ✅ | ✅ |
+| Offline write queue | ✅ | ✅ Writes queued and replayed on reconnect |
+| Offline banner | ✅ | ✅ |
+| Installable to home screen | ✅ | ✅ |
 
-- **Scan a station barcode** to pull up the full list of items that should be at that station
-- **Scan each item barcode** to mark it as Found — the list updates in real time with a green tick
-- **Flag missing or misplaced items** automatically when the audit is submitted
-- **Submit an audit report** that admins can view, grouped by date, from the Admin panel
-- **Export audit reports** to CSV (for Google Sheets / Excel) or PDF
-- **Report issues** directly from the app (equipment problems, missing items, etc.)
-- **Work offline** — the service worker caches the app so it loads without internet
+Use **PWA-Smartphone** when users may have no internet connection during audits.
 
-Admins get a separate panel to manage stations, items, distribution assignments, users, and view all audit history.
+---
+
+## Features
+
+- **Dashboard** — landing page shows all stations with days since last audit, colour-coded green / amber / red; tap any card to start an audit
+- **Floating scan button** — semi-transparent red FAB at top-right; one tap opens the camera scanner
+- **Barcode scanning** — scan station and item barcodes with the phone camera (self-hosted library)
+- **Station dropdown + search** — select or search without scanning
+- **Item remarks** — remarks appear in the scan popup and checklist; multiple sub-location remarks shown as `SubLoc: remark; SubLoc: remark`
+- **Audit reports** — view all completed audits; export to CSV or A4 PDF
+- **PDF report** — includes item, version, status, condition, sub-location, and remarks
+- **Admin panel** — manage stations, sub-locations, items, distribution, users, and reports
+- **Camera scan in admin forms** — scan a barcode directly into any barcode field
+- **Issue reporting** — staff report problems; admins view and resolve them
+- **Full offline support** — app shell cached at install; API responses cached with stale-while-revalidate; offline writes queued and synced on reconnect
+- **Offline banner** — shown automatically when device has no internet
+- **Installable PWA** — add to home screen on Android and iPhone, launches full-screen with no browser bar
+- **Auto-backup** — rolling 7-backup system for the SQLite database
 
 ---
 
 ## Requirements
 
 - [Node.js](https://nodejs.org/) v18 or later
-- npm (comes with Node.js)
-- A modern browser (Chrome, Safari, Edge, Firefox)
-- Camera access on mobile for barcode scanning
+- npm (included with Node.js)
+- A modern browser — Chrome (Android), Safari (iPhone), Edge, or Firefox
+- Camera permission for barcode scanning
 
 ---
 
-## Installation
-
-### 1. Clone the repository
+## Quick Start
 
 ```bash
-git clone https://github.com/trendsyncjourney-max/PWA.git
-cd PWA
-```
+# 1. Clone the repo (dev branch — active development)
+git clone -b dev https://github.com/trendsyncjourney-max/PWA-Smartphone.git
+cd PWA-Smartphone
 
-### 2. Install dependencies
-
-```bash
+# 2. Install dependencies
 npm install
-```
 
-### 3. Start the server
-
-```bash
-# Development (auto-restarts on file changes)
+# 3. Start in development mode (auto-restarts on file change)
 npm run dev
 
-# Production
+# OR start in production mode
 npm start
 ```
 
-The server runs on **http://localhost:3000** by default.
+Open **http://localhost:3000** in your browser.
 
-### 4. Open in browser
+---
 
-Navigate to `http://localhost:3000` in your browser.
+## Production Deploy with PM2
+
+[PM2](https://pm2.keymetrics.io/) keeps the server running in the background and restarts it on crash or reboot.
+
+```bash
+# Install PM2 globally (one-time)
+npm install -g pm2
+
+# Start the app
+pm2 start server.js --name barcode-audit
+
+# Auto-start after server reboot
+pm2 save
+pm2 startup    # run the printed command to enable startup on boot
+
+# Common commands
+pm2 status                  # check process status
+pm2 logs barcode-audit      # tail live logs
+pm2 restart barcode-audit   # restart after code changes
+pm2 stop barcode-audit      # stop the server
+```
+
+---
+
+## Expose Over the Internet (Cloudflare Tunnel)
+
+Required if users are on different networks (e.g. airport Wi-Fi, mobile data). No domain or firewall changes needed.
+
+```bash
+# Install cloudflared (Linux, one-time)
+curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+  -o cloudflared
+chmod +x cloudflared
+sudo mv cloudflared /usr/local/bin/
+
+# macOS (Homebrew)
+brew install cloudflared
+
+# Start a temporary public tunnel
+cloudflared tunnel --url http://localhost:3000
+```
+
+Cloudflare prints a URL like `https://random-words.trycloudflare.com`. Share it with users.
+
+> **Note:** The URL changes every time you restart the tunnel. For a permanent URL, create a free Cloudflare account and set up a [named tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps).
+
+Run the tunnel in the background with PM2:
+
+```bash
+pm2 start "cloudflared tunnel --url http://localhost:3000" --name tunnel
+pm2 save
+```
 
 ---
 
 ## First-Time Setup
 
-After starting the server for the first time, log in as admin and do the following:
+After starting the server, log in as admin and complete these steps once:
 
-1. **Add Stations** — Go to Admin → Stations → Add. Give each station a name, location, and a unique barcode value (this is what gets printed on the physical barcode label).
+1. **Add Stations** → Admin → Stations → Add  
+   Each station needs a name, location, and a unique barcode value (what's printed on the physical label).
 
-2. **Add Items** — Go to Admin → Items → Add. Enter the item name and its barcode value (from the physical label on the item).
+2. **Add Items** → Admin → Items → Add  
+   Enter the item name and the barcode on the physical item label.
 
-3. **Assign Items to Stations** — Go to Admin → Distribution → Assign. Select an item and the station it belongs to. Repeat for each item at each station.
+3. **Assign Items to Stations** → Admin → Distribution → Assign  
+   Choose an item, the station it belongs to, optionally a sub-location (e.g. "LHS", "PAX"), and remarks (e.g. `QTY x2`). The same item can be assigned to multiple sub-locations with different remarks.
 
-4. **Add Staff Users** — Go to Admin → Users → Add. Create a username and password for each staff member. Set role to `user` for regular staff, `admin` for administrators.
-
-Once stations and items are set up, staff can immediately start scanning audits.
+4. **Add Staff Users** → Admin → Users → Add  
+   Use role `user` for regular staff, `admin` for administrators.
 
 ---
 
 ## How to Use
 
-### Logging In
+### Dashboard (landing page after login)
 
-Open the app URL on your phone or browser. Enter your username and password and tap **Sign In**.
+Every station is listed with a badge showing how long ago it was last audited:
+
+| Badge colour | Meaning |
+|---|---|
+| 🟢 Green | Audited within the last 7 days |
+| 🟡 Amber | 8–30 days since last audit |
+| 🔴 Red | More than 30 days since last audit |
+| ⬜ Gray | No audit ever submitted |
+
+- **Tap a station card** to start an audit for that station immediately.
+- **Tap the red floating button** (top-right) to open the camera and scan a station barcode.
 
 ### Running an Audit
 
-1. Tap the **Audit** tab at the bottom of the screen.
-2. Tap **Scan Station Barcode** and point your camera at the station's barcode label. Alternatively, type the station name in the search box and select it.
-3. The app loads the full list of items expected at that station.
-4. Tap **Scan Item** and scan each item's barcode. The item turns **green** (Found) when confirmed.
-5. If an item is not at the station, you can skip it — it will be marked **Missing** automatically when you submit.
-6. When finished scanning, tap **Done Scanning**, then **Submit Report**.
-7. The audit is saved. Any missing items are flagged and visible to admins in the Reports panel.
-
-> **Tip:** If you close the app mid-audit, reopening and scanning the same station will resume where you left off.
-
-### Reporting an Issue
-
-1. Tap the **Issues** tab.
-2. Fill in a title, select a category, and describe the problem.
-3. Tap **Submit Report**. The report appears in the Admin → Issues panel for the admin to review and resolve.
+1. Select a station from the Dashboard, or go to the **Audit** tab and scan / search / select a station.
+2. The app loads the full expected item list for that station.
+3. Tap **Scan Item** and scan each item's barcode.  
+   A popup shows the item name, remarks (e.g. `LHS: QTY x2; PAX: QTY x6`), and asks for the item condition (Good / OK / Bad).
+4. Confirmed items turn **green**. Sub-location is shown on its own line below the item name.
+5. Tap **Done Scanning**, review the list, then **Submit Report**.
+6. Unscanned items are automatically marked **Missing**.
 
 ### Admin Panel
 
-Only users with the `admin` role can see the Admin tab.
-
-| Tab | What you can do |
+| Tab | Purpose |
 |---|---|
-| **Stations** | Add or delete stations |
-| **Items** | Add or delete items, optionally assign to a station at creation |
-| **Distribution** | Assign items to stations, reassign, or remove assignments |
-| **Users** | Add or delete user accounts |
-| **Reports** | View all completed audits grouped by date; export to CSV or PDF |
-| **Issues** | View and resolve issue reports submitted by staff |
-| **Settings** | Set admin email address |
-
-**Exporting Reports:**
-- **CSV** — downloads a spreadsheet file you can open in Google Sheets or Excel
-- **PDF** — opens the browser print dialog; choose "Save as PDF"
+| Stations | Add / delete stations |
+| Sub-Locations | Add sub-locations within a station (e.g. LHS, PAX) |
+| Items | Add / delete items |
+| Distribution | Assign items to stations with sub-location and remarks |
+| Users | Manage staff accounts |
+| Reports | View all audits; export CSV or PDF |
+| Issues | View and resolve issue reports from staff |
+| Query | Look up audit history by station |
+| Backups | Create or restore database backups |
+| Settings | Set admin notification email |
 
 ### Changing Your Password
 
-Tap the **⋮ (three dots)** button in the top-right corner. Enter your current password, then your new password twice, and tap **Update Password**. This works for all users — admin and regular staff alike.
+Tap **⋮** (top-right) → enter current password → enter and confirm new password → **Update Password**.
 
 ---
 
-## Installing on Your Phone (PWA)
+## Installing on Your Phone
 
-The app can be installed as a native-like app on iOS and Android — no app store needed.
+Installing adds the app to your home screen so it opens full-screen like a native app — no browser bar.
 
-**Android (Chrome):**
+### Android (Chrome)
 1. Open the app URL in Chrome.
-2. Tap the three-dot menu → **Add to Home Screen**.
-3. Tap **Add**. The app icon appears on your home screen.
+2. Tap **⋮** → **Add to Home Screen** → **Add**.
+3. The app icon appears on your home screen.
 
-**iPhone (Safari):**
-1. Open the app URL in Safari.
-2. Tap the **Share** button (box with arrow at the bottom).
-3. Scroll down and tap **Add to Home Screen**.
-4. Tap **Add**. The app icon appears on your home screen.
+### iPhone (Safari)
+1. Open the app URL in **Safari** (must be Safari, not Chrome on iPhone).
+2. Tap the **Share** button (box with upward arrow at the bottom).
+3. Scroll down and tap **Add to Home Screen** → **Add**.
+4. The app icon appears on your home screen.
 
-Once installed, the app works offline and feels like a native app — no browser bar, full screen.
+After installing, open the app from the home screen icon. It will load and work even in **airplane mode** once the caches are warm (i.e. you've visited at least once with internet).
+
+---
+
+## Offline Behaviour
+
+The service worker handles three scenarios:
+
+| Scenario | Behaviour |
+|---|---|
+| **No internet, loading the app** | App loads from cache — full UI available |
+| **No internet, viewing data** | Stations, items, distribution served from cache |
+| **No internet, submitting a write** | Write is queued in `localStorage`; synced automatically when internet returns |
+
+An **orange banner** appears at the top of the screen when the device is offline. When connectivity returns the banner disappears and any queued writes are replayed automatically, with a success toast.
 
 ---
 
 ## Default Credentials
 
-When the server starts for the first time, a default admin account is created:
-
 | Username | Password |
 |---|---|
 | `admin` | `admin123` |
 
-**Change this password immediately** after first login using the ⋮ menu → Change Password.
+**Change this password immediately** after first login using the ⋮ menu.
 
 ---
 
@@ -184,67 +263,80 @@ Create a `.env` file in the project root to override defaults:
 
 ```env
 PORT=3000
-JWT_SECRET=your-secret-key-here
+JWT_SECRET=change-this-to-a-long-random-string
 ADMIN_EMAIL=your@email.com
 SMTP_USER=your@gmail.com
-SMTP_PASS=your-app-password
+SMTP_PASS=your-gmail-app-password
 ```
 
 | Variable | Default | Description |
 |---|---|---|
 | `PORT` | `3000` | Port the server listens on |
-| `JWT_SECRET` | `barcode-audit-secret-key-2026` | Secret key for JWT tokens — **change in production** |
-| `ADMIN_EMAIL` | `trendsyncjourney@gmail.com` | Email address for admin notifications |
-| `SMTP_USER` | — | Gmail address for sending emails (optional) |
-| `SMTP_PASS` | — | Gmail app password (optional) |
-
-If `SMTP_USER` and `SMTP_PASS` are not set, email notifications are logged to the console only.
+| `JWT_SECRET` | `barcode-audit-secret-key-2026` | JWT signing secret — **change in production** |
+| `ADMIN_EMAIL` | — | Email address for issue report notifications |
+| `SMTP_USER` | — | Gmail address for sending email (optional) |
+| `SMTP_PASS` | — | Gmail app password — not your account password (optional) |
 
 ---
 
 ## Project Structure
 
 ```
-PWA/
-├── server.js            # Express backend, API routes, SQLite database
+PWA-Smartphone/
+├── server.js              # Express backend — all API routes, auth, SQLite
 ├── package.json
+├── CHANGELOG.md           # Full version history
 ├── database/
-│   └── audit.db         # SQLite database (auto-created on first run)
-├── public/
-│   ├── index.html       # Main PWA shell
-│   ├── app.js           # Frontend JavaScript
-│   ├── styles.css       # Styles (DHL brand theme)
-│   ├── sw.js            # Service worker (offline support)
-│   ├── manifest.json    # PWA manifest (name, icons, theme)
-│   └── dhl-logo.svg     # Brand asset
-└── CHANGELOG.md         # Version history
+│   ├── audit.db           # SQLite database (auto-created on first run)
+│   └── backups/           # Automatic rolling backups (up to 7 kept)
+└── public/
+    ├── index.html         # PWA shell — all screens and modals
+    ├── app.js             # All frontend logic (vanilla JS)
+    ├── styles.css         # UI theme and layout
+    ├── sw.js              # Service worker — full offline caching
+    ├── manifest.json      # PWA manifest (name, icons, theme colour)
+    ├── icon-192x192.png   # App icon for home screen
+    ├── icon-512x512.png   # App icon (maskable, for Android)
+    ├── dhl-logo.png       # Logo shown in header and login screen
+    ├── fonts/
+    │   ├── fonts.css          # @font-face for Libre Barcode 39
+    │   └── LibreBarcode39.woff2  # Self-hosted barcode font
+    └── vendor/
+        └── html5-qrcode.min.js   # Self-hosted barcode scanning library
 ```
+
+All external dependencies are bundled locally — the app makes **zero requests to external CDNs**.
 
 ---
 
-## Versioning
+## Version History
 
-| Version | Date | Notes |
-|---|---|---|
-| `v0.1` | 2026-04-28 | Initial stable release — full audit flow, admin panel, reports, export, change password |
+| Version | Highlights |
+|---|---|
+| **v1.8.0** | Remarks in scan popup; floating Scan to Audit FAB; sub-location always visible |
+| **v1.7.0** | Dashboard landing page; scan shortcut; remarks in checklist and PDF |
+| **v1.6.0** | Camera scan in admin forms; large item name in scan popup |
+| **v1.5.0** | PWA-Smartphone repo created — self-hosted fonts + vendor; app icons; offline write queue |
+| **v1.4.0** | Station dropdown on audit welcome screen |
+| **v1.3.0** | Sub-locations; admin query tool; database backups |
+| **v1.2.0** | Issue reporting; CSV/PDF export; admin settings |
+| **v1.1.0** | Offline write queue; offline banner |
+| **v1.0.0** | Initial release — full audit flow, admin panel, reports |
 
-To run a specific version:
-
-```bash
-git checkout v0.1
-npm install
-npm start
-```
-
-See [CHANGELOG.md](CHANGELOG.md) for a full list of features per version.
+See [CHANGELOG.md](CHANGELOG.md) for full details per version.
 
 ---
 
 ## Tech Stack
 
-- **Backend:** Node.js, Express, SQLite3
-- **Auth:** JWT (jsonwebtoken), bcryptjs
-- **Frontend:** Vanilla HTML/CSS/JavaScript (no framework)
-- **Barcode scanning:** html5-qrcode
-- **PWA:** Service Worker, Web App Manifest
-- **Hosting/tunnel:** Cloudflare Tunnel (for sharing over the internet)
+| Layer | Technology |
+|---|---|
+| Backend | Node.js, Express |
+| Database | SQLite3 (file-based, zero config) |
+| Auth | JWT (jsonwebtoken), bcryptjs |
+| Frontend | Vanilla HTML / CSS / JavaScript — no framework |
+| Barcode scanning | html5-qrcode (self-hosted) |
+| Barcode font | Libre Barcode 39 (self-hosted WOFF2) |
+| PWA | Service Worker, Web App Manifest |
+| Process manager | PM2 |
+| Public tunnel | Cloudflare Tunnel |
