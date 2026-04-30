@@ -663,7 +663,8 @@ function renderItemChecklist() {
           }
         </div>
         <div class="checklist-item-info">
-          <div class="checklist-item-name">${item.item_name} ${subLocHtml}</div>
+          <div class="checklist-item-name">${item.item_name}</div>
+          ${subLocHtml ? `<div class="checklist-item-subloc">${subLocHtml}</div>` : ''}
           <div class="checklist-item-barcode">${item.barcode || '<em style="color:var(--warning)">No barcode — tap to update</em>'}</div>
           ${item.remarks ? `<div class="checklist-item-remarks">${item.remarks}</div>` : ''}
         </div>

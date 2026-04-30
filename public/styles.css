@@ -1892,6 +1892,10 @@ body {
   text-overflow: ellipsis;
 }
 
+.checklist-item-subloc {
+  margin-top: 3px;
+}
+
 .checklist-item-barcode {
   font-size: 0.75rem;
   color: var(--gray-400);
@@ -2077,8 +2081,6 @@ body {
   font-weight: 600;
   padding: 0.15rem 0.5rem;
   border-radius: var(--radius-full);
-  margin-left: var(--space-1);
-  vertical-align: middle;
 }
 
 /* ============================================
