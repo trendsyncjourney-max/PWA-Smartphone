@@ -507,7 +507,10 @@ function showConditionModal(item, subLocations, matchingEntries) {
   modal.dataset.mode = 'condition';
   modal.dataset.selectedCondition = '';
 
-  const remarks = matchingEntries[0]?.remarks || null;
+  const remarks = matchingEntries
+    .filter(e => e.remarks)
+    .map(e => e.sub_location_name ? `${e.sub_location_name}: ${e.remarks}` : e.remarks)
+    .join('; ') || null;
   populateItemInfoInModal(item, remarks);
   document.getElementById('status-modal-title').textContent = 'Item Condition';
 
